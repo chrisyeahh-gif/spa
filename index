@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maîtriser la Sécurité des Systèmes d'IA Autonomes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        accent: {
+                            safe: '#059669',
+                            danger: '#e11d48',
+                            neutral: '#d97706'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .flip-card {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        #networkCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased leading-relaxed">
+
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Emerald (Safe), Rose (Danger), and Amber (Neutral) accents -->
+    
+    <!-- Application Structure Plan: The SPA uses a "Learning Dashboard" architecture. It starts with an engaging hero section (with a canvas-based neural network animation) to set the context. The content is then divided into three logical learning phases: 1. "Panorama des Menaces" (Overview/Themes) using a Radar Chart to visualize the multi-dimensional risks. 2. "Concepts & Lexique" (Core Knowledge) using interactive flip cards for active vocabulary recall and grid cards for concepts, supporting the "Study Guide" goal. 3. "Auto-Évaluation" (Assessment) using an interactive accordion for the review questions. This structure transforms a static list into an engaging, step-by-step educational journey. -->
+
+    <!-- Visualization & Content Choices: 
+    1. Hero Background -> Goal: Engage/Set Tone -> Presentation: Canvas Particle Network -> Interaction: Dynamic ambient animation -> Justification: Visually represents AI nodes without heavy SVGs.
+    2. Themes -> Goal: Organize/Compare -> Presentation: Chart.js Radar Chart -> Interaction: Hover tooltips -> Justification: Shows how different attack vectors target different dimensions of AI security.
+    3. Core Concepts -> Goal: Inform -> Presentation: Tailwind Grid Cards -> Interaction: Hover highlight -> Justification: Clean, readable segmentation of critical ideas.
+    4. Vocabulary -> Goal: Organize/Test -> Presentation: CSS 3D Flip Cards -> Interaction: Click to flip -> Justification: Emulates study flashcards, enforcing active recall.
+    5. Key Questions -> Goal: Inform/Assess -> Presentation: JS Accordion -> Interaction: Click to reveal answer -> Justification: Prevents overwhelming the user with text and encourages them to formulate an answer before reading the solution.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <nav class="sticky top-0 z-50 bg-stone-100/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 font-bold text-xl text-stone-900">
+                    <span class="text-2xl">&#x1F6E1;</span> IA CyberSec
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#panorama" class="text-stone-600 hover:text-accent-danger transition-colors font-medium">Panorama</a>
+                    <a href="#concepts" class="text-stone-600 hover:text-accent-neutral transition-colors font-medium">Concepts</a>
+                    <a href="#lexique" class="text-stone-600 hover:text-accent-safe transition-colors font-medium">Lexique</a>
+                    <a href="#evaluation" class="text-stone-600 hover:text-stone-900 transition-colors font-medium">Évaluation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative bg-stone-900 text-stone-50 overflow-hidden py-20 lg:py-32">
+        <canvas id="networkCanvas"></canvas>
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
+                Maîtriser la Sécurité des <span class="text-accent-danger">Systèmes d'IA Autonomes</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-stone-300 mb-8 max-w-3xl mx-auto font-light">
+                Guide interactif de cybersécurité appliquée à l'Intelligence Artificielle.
+            </p>
+            <div class="bg-stone-800/80 backdrop-blur border border-stone-700 p-6 rounded-2xl shadow-xl text-left max-w-3xl mx-auto">
+                <p class="text-stone-200 leading-relaxed">
+                    Ce tableau de bord synthétise les menaces émergentes liées à l'intégration de l'IA. Il met l'accent sur la distinction entre les attaques classiques (DDoS, Malware) et les <strong class="text-accent-danger">attaques spécifiques à l'IA</strong> qui manipulent la logique, les données d'apprentissage ou les capacités d'action des agents autonomes. Explorez les stratégies de défense robustes pour sécuriser l'avenir.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-24">
+
+        <section id="panorama" class="scroll-mt-24">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">&#x1F310; Panorama des Menaces</h2>
+                <p class="text-stone-600 max-w-2xl mx-auto">
+                    Cette section offre une vue d'ensemble des vecteurs d'attaque ciblant les écosystèmes d'IA. Le graphique ci-dessous illustre l'intensité relative des risques à travers les quatre thèmes majeurs de la cybersécurité de l'IA abordés dans ce guide, vous aidant à visualiser où se concentrent les vulnérabilités.
+                </p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-200">
+                <div class="chart-container">
+                    <canvas id="themesChart"></canvas>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-100">
+                        <div class="text-2xl mb-2">&#x1F5E3;</div>
+                        <h3 class="font-semibold text-stone-800">Vulnérabilités LLM</h3>
+                        <p class="text-sm text-stone-500 mt-1">Manipulations sémantiques</p>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-100">
+                        <div class="text-2xl mb-2">&#x1F916;</div>
+                        <h3 class="font-semibold text-stone-800">Sécurité des Agents</h3>
+                        <p class="text-sm text-stone-500 mt-1">Détournement d'actions</p>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-100">
+                        <div class="text-2xl mb-2">&#x26C1;</div>
+                        <h3 class="font-semibold text-stone-800">Cycle de vie</h3>
+                        <p class="text-sm text-stone-500 mt-1">Entraînement et Inférence</p>
+                    </div>
+                    <div class="p-4 bg-stone-50 rounded-xl border border-stone-100">
+                        <div class="text-2xl mb-2">&#x1F512;</div>
+                        <h3 class="font-semibold text-stone-800">Confidentialité</h3>
+                        <p class="text-sm text-stone-500 mt-1">Fuites de données privées</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="concepts" class="scroll-mt-24">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4 border-l-4 border-accent-neutral pl-4">&#x1F4DA; Concepts Fondamentaux</h2>
+                <p class="text-stone-600 max-w-3xl">
+                    Explorez ici les mécanismes d'attaque et de défense de base spécifiques à l'IA. Cette section décompose les idées complexes du rapport en cartes thématiques claires, vous permettant d'appréhender les dynamiques d'exploitation (comme l'injection de prompt) et les architectures de sécurité (comme le Sandboxing).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-accent-danger group-hover:w-2 transition-all"></div>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3 flex items-center gap-2">
+                        <span>&#x1F489;</span> Injection de Prompt
+                    </h3>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Manipulation des instructions d'une IA pour lui faire ignorer ses filtres de sécurité. L'<strong>injection indirecte</strong> est particulièrement sournoise car elle provient de données tierces (web, emails) lues par l'agent.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-accent-danger group-hover:w-2 transition-all"></div>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3 flex items-center gap-2">
+                        <span>&#x2694;</span> IA Agentique & Actions
+                    </h3>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Contrairement aux chatbots passifs, les agents peuvent utiliser des outils (APIs, terminaux). Cela crée un risque critique d'exécution d'actions non autorisées si l'agent est compromis.
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-accent-safe group-hover:w-2 transition-all"></div>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3 flex items-center gap-2">
+                        <span>&#x1F511;</span> Moindre Privilège
+                    </h3>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Principe défensif crucial consistant à ne donner à un agent IA que les accès strictement nécessaires à sa tâche pour limiter l'impact d'un détournement (hijacking).
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-stone-800 group-hover:w-2 transition-all"></div>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3 flex items-center gap-2">
+                        <span>&#x1F3AF;</span> Robustesse Antagoniste
+                    </h3>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Capacité d'un modèle à ne pas être trompé par des entrées subtilement modifiées (bruit mathématique invisible sur une image, texte biaisé).
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow relative overflow-hidden group md:col-span-2 lg:col-span-1 lg:col-start-2">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-accent-safe group-hover:w-2 transition-all"></div>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3 flex items-center gap-2">
+                        <span>&#x1F4E6;</span> Sandboxing (Isolation)
+                    </h3>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        Environnement d'exécution restreint pour le code généré par l'IA, empêchant formellement l'accès au réseau local ou au système de fichiers sensible de l'hôte.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="lexique" class="scroll-mt-24 bg-stone-200/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-16 rounded-3xl">
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4">&#x1F5C2; Lexique Interactif</h2>
+                <p class="text-stone-600 max-w-2xl mx-auto">
+                    Maîtrisez le jargon technique grâce à ces cartes mémoires interactives. Cliquez sur chaque terme pour révéler sa définition. Cet exercice de mémorisation active est essentiel pour consolider votre compréhension du domaine.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto" id="flashcard-container">
+            </div>
+        </section>
+
+        <section id="evaluation" class="scroll-mt-24 mb-24">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-4 border-l-4 border-stone-800 pl-4">&#x2705; Auto-Évaluation</h2>
+                <p class="text-stone-600 max-w-3xl">
+                    Testez votre compréhension avec ces questions de révision clés tirées du guide. Cliquez sur une question pour vérifier votre raisonnement. L'objectif est de vous assurer que vous pouvez relier les concepts théoriques à leurs implications pratiques de sécurité.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-stone-200 divide-y divide-stone-200" id="accordion-container">
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-8 text-center border-t border-stone-800">
+        <p>&#x1F4BB; Module d'Apprentissage Interactif - Cybersécurité IA</p>
+    </footer>
+
+    <script>
+        const flashcardsData = [
+            { term: "Jailbreaking", def: "Utilisation de scénarios de 'jeu de rôle' ou de logique complexe pour forcer l'IA à outrepasser ses règles éthiques.", icon: "&#x1F513;" },
+            { term: "Prompt Hijacking", def: "Détournement de l'objectif de l'agent pour qu'il serve les buts de l'attaquant au lieu de sa mission initiale.", icon: "&#x1F3F4;&#x200D;&#x2620;&#xFE0F;" },
+            { term: "Cross-domain Prompt Injection", def: "Attaque où une instruction malveillante reçue via un canal (ex: email) déclenche une action sur un autre canal (ex: suppression).", icon: "&#x1F500;" },
+            { term: "Confused Deputy", def: "Problème où un agent privilégié effectue une action dangereuse pour un utilisateur non privilégié car il a été trompé.", icon: "&#x1F635;" },
+            { term: "RAG", def: "Retrieval-Augmented Generation : Architecture où l'IA va chercher des informations dans une base externe avant de répondre.", icon: "&#x1F50D;" },
+            { term: "Differential Privacy", def: "Technique mathématique ajoutant du bruit aux données d'entraînement pour empêcher la ré-identification individuelle.", icon: "&#x1F575;&#xFE0F;" }
+        ];
+
+        const flashcardContainer = document.getElementById('flashcard-container');
+        flashcardsData.forEach(item => {
+            const cardHtml = `
+                <div class="flip-card h-48 cursor-pointer w-full group" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative w-full h-full rounded-2xl">
+                        <div class="flip-card-front absolute w-full h-full bg-white border border-stone-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center group-hover:border-accent-neutral transition-colors">
+                            <span class="text-4xl mb-3">${item.icon}</span>
+                            <h4 class="font-bold text-lg text-stone-900">${item.term}</h4>
+                            <span class="text-xs text-stone-400 mt-2 font-medium tracking-wide uppercase">Cliquez pour révéler</span>
+                        </div>
+                        <div class="flip-card-back absolute w-full h-full bg-stone-800 text-stone-50 rounded-2xl p-6 flex items-center justify-center text-center border border-stone-700">
+                            <p class="text-sm font-medium leading-relaxed">${item.def}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            flashcardContainer.innerHTML += cardHtml;
+        });
+
+        const questionsData = [
+            {
+                q: "Quelle est la différence fondamentale entre le Data Poisoning et une Inference Attack ?",
+                a: "Le <strong>Data Poisoning</strong> modifie les données d'entraînement en amont pour corrompre le comportement futur de l'IA. À l'inverse, l'<strong>Inference Attack</strong> intervient après le déploiement, en analysant les réponses du modèle pour deviner et extraire des données privées utilisées lors de sa création."
+            },
+            {
+                q: "Pourquoi un agent IA capable de lire ses propres logs pourrait-il tomber dans une 'Boucle de Rétroaction Malveillante' ?",
+                a: "Si un agent lit un log contenant une instruction malveillante (injection indirecte) et l'exécute, son action peut générer un nouveau log contenant cette même instruction ou son résultat. L'agent relira ce nouveau log à la boucle suivante, créant un cycle infini d'amplification du comportement anormal."
+            },
+            {
+                q: "Expliquez le risque lié aux 'Shadow AI Agents' dans une infrastructure d'entreprise.",
+                a: "Il s'agit de l'utilisation d'agents IA par des employés sans l'autorisation ou la supervision de la DSI. Le risque majeur est la <strong>fuite de données confidentielles</strong> vers des modèles tiers non sécurisés, échappant totalement à la politique de sécurité et de conformité de l'entreprise."
+            },
+            {
+                q: "En quoi l'approche 'Human-in-the-loop' constitue-t-elle la défense la plus efficace contre les actions destructrices autonomes ?",
+                a: "Cette approche intègre une étape de validation obligatoire par un humain avant l'exécution de toute action critique (comme modifier une base de données ou envoyer un email de masse). Elle agit comme un pare-feu absolu, empêchant un agent compromis d'agir de manière totalement autonome."
+            },
+            {
+                q: "Comment un exemple antagoniste peut-il tromper une IA de vision sans qu'un humain ne s'en aperçoive ?",
+                a: "L'attaquant ajoute un bruit mathématique extrêmement subtil aux pixels de l'image. Ce bruit modifie la distribution des données de manière imperceptible pour l'œil humain, mais il est calculé précisément pour désorienter le réseau de neurones et inverser radicalement sa prédiction (ex: faire voir un panneau Stop comme un panneau 130 km/h)."
+            }
+        ];
+
+        const accordionContainer = document.getElementById('accordion-container');
+        questionsData.forEach((item, index) => {
+            const html = `
+                <div class="border-b border-stone-200 last:border-0">
+                    <button class="w-full text-left p-6 focus:outline-none flex justify-between items-center group" onclick="toggleAccordion('acc-${index}', this)">
+                        <span class="font-semibold text-stone-800 group-hover:text-accent-safe transition-colors pr-8">
+                            <span class="text-stone-400 font-mono mr-2">Q${index+1}.</span>${item.q}
+                        </span>
+                        <span class="transform transition-transform duration-300 text-stone-400 group-hover:text-accent-safe" id="icon-acc-${index}">&#x25BC;</span>
+                    </button>
+                    <div id="acc-${index}" class="hidden px-6 pb-6 pt-0">
+                        <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-stone-700 text-sm leading-relaxed border-l-4 border-l-emerald-500">
+                            ${item.a}
+                        </div>
+                    </div>
+                </div>
+            `;
+            accordionContainer.innerHTML += html;
+        });
+
+        function toggleAccordion(id, btn) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+                btn.classList.add('bg-stone-50');
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+                btn.classList.remove('bg-stone-50');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('themesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Manipulations (LLM)', 
+                        'Autonomie & Actions', 
+                        'Vulnérabilités Données', 
+                        'Fuites Confidentialité', 
+                        'Robustesse Modèle'
+                    ],
+                    datasets: [{
+                        label: 'Niveau d\'Exposition Actuel (Conceptuel)',
+                        data: [90, 85, 70, 75, 80],
+                        backgroundColor: 'rgba(225, 29, 72, 0.2)',
+                        borderColor: 'rgba(225, 29, 72, 1)',
+                        pointBackgroundColor: 'rgba(225, 29, 72, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(225, 29, 72, 1)',
+                        borderWidth: 2,
+                    },
+                    {
+                        label: 'Couverture Défensive Standard',
+                        data: [40, 30, 60, 50, 45],
+                        backgroundColor: 'rgba(5, 150, 105, 0.2)',
+                        borderColor: 'rgba(5, 150, 105, 1)',
+                        pointBackgroundColor: 'rgba(5, 150, 105, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(5, 150, 105, 1)',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0,0,0,0.1)' },
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            pointLabels: {
+                                font: { family: 'Inter', size: 12, weight: '600' },
+                                color: '#444'
+                            },
+                            ticks: { display: false, min: 0, max: 100 }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter' } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(28, 25, 23, 0.9)',
+                            titleFont: { family: 'Inter', size: 14 },
+                            bodyFont: { family: 'Inter', size: 13 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            });
+
+            const canvas = document.getElementById('networkCanvas');
+            const cctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+
+            function resize() {
+                width = canvas.width = canvas.parentElement.offsetWidth;
+                height = canvas.height = canvas.parentElement.offsetHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.radius = Math.random() * 2 + 1;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                }
+                draw() {
+                    cctx.beginPath();
+                    cctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    cctx.fillStyle = '#f5f5f4';
+                    cctx.fill();
+                }
+            }
+
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle());
+            }
+
+            function animate() {
+                cctx.clearRect(0, 0, width, height);
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 150) {
+                            cctx.beginPath();
+                            cctx.strokeStyle = `rgba(245, 245, 244, ${1 - dist/150})`;
+                            cctx.lineWidth = 0.5;
+                            cctx.moveTo(particles[i].x, particles[i].y);
+                            cctx.lineTo(particles[j].x, particles[j].y);
+                            cctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        });
+    </script>
+</body>
+</html>
+```
